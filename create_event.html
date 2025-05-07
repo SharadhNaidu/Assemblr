@@ -1,0 +1,469 @@
+{% extends "base.html" %}
+
+{% block title %}Create New Event{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Create New Event</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('create_event') }}" enctype="multipart/form-data" id="eventForm">
+                        <!-- Basic Event Information -->
+                        <div class="section mb-4">
+                            <h6 class="text-primary mb-3">Basic Information</h6>
+                            <div class="mb-3">
+                                <label for="event_banner" class="form-label">Event Banner</label>
+                                <input type="file" class="form-control" id="event_banner" name="event_banner" accept="image/*">
+                                <small class="text-muted">Recommended size: 1200x630px (16:9 ratio)</small>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="event_name" class="form-label">Event Name *</label> <!-- Changed id/name -->
+                                    <input type="text" class="form-control" id="event_name" name="event_name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="event_type" class="form-label">Event Type *</label>
+                                    <select class="form-select" id="event_type" name="event_type" required>
+                                        <option value="">Select Event Type</option>
+                                        <option value="HACKATHON">Hackathon</option>
+                                        <option value="ESPORTS">Esports</option>
+                                        <option value="FIRESIDE_CHAT">Fireside Chat</option>
+                                        <option value="TECH_CONFERENCE">Tech Conference</option>
+                                        <option value="PRODUCT_LAUNCH">Product Launch</option>
+                                        <option value="DEVELOPER_CONFERENCE">Developer Conference</option>
+                                        <option value="TECH_WALK">Tech Walk</option>
+                                        <option value="DEVELOPER_GET_TOGETHERS">Developer Get Togethers</option>
+                                        <option value="FOUNDERS_MEET">Founders Meet</option>
+                                        <option value="STARTUPS_MEET">Startups Meet</option>
+                                        <option value="BOOTCAMP">Bootcamp</option>
+                                        <option value="HANDS_ON">Hands On</option>
+                                        <option value="INVESTORS_MEETING">Investors Meeting</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="event_details" class="form-label">Event Description *</label>
+                                <textarea class="form-control" id="event_details" name="event_details" rows="4" required></textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="event_tags" class="form-label">Event Tags</label>
+                                    <input type="text" class="form-control" id="event_tags" name="event_tags" placeholder="Enter tags separated by commas">
+                                    <small class="text-muted">e.g. technology, startup, coding</small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="event_visibility" class="form-label">Event Visibility *</label>
+                                    <select class="form-select" id="event_visibility" name="event_visibility" required>
+                                        <option value="public">Public - Anyone can view and register</option>
+                                        <option value="private">Private - Only invited participants can view</option>
+                                        <option value="unlisted">Unlisted - Only accessible via direct link</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="registration_deadline" class="form-label">Registration Deadline *</label>
+                                    <input type="datetime-local" class="form-control" id="registration_deadline" name="registration_deadline" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="external_link" class="form-label">External Website/Registration Link</label>
+                                    <input type="url" class="form-control" id="external_link" name="external_link" placeholder="https://">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hackathon Specific Fields (Initially Hidden) -->
+                        <div id="hackathonFields" style="display: none;">
+
+                            <!-- Event Configuration -->
+                            <div class="section mb-4">
+                                <h6 class="text-primary mb-3">Event Configuration</h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="event_mode" class="form-label">Hackathon Mode *</label>
+                                        <select class="form-select" id="event_mode" name="event_mode">
+                                            <option value="">Select Mode</option>
+                                            <option value="online">Online</option>
+                                            <option value="offline">Offline</option>
+                                            <option value="hybrid">Hybrid</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="participation_mode" class="form-label">Participation Mode *</label>
+                                        <select class="form-select" id="participation_mode" name="participation_mode">
+                                            <option value="">Select Mode</option>
+                                            <option value="approval">Approval Required</option>
+                                            <option value="everyone">Open for Everyone</option>
+                                            <option value="pay">Payment Required</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row location-fields" style="display: none;">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="city" class="form-label">City *</label>
+                                        <!-- Add a select dropdown for Indian cities -->
+                                        <select class="form-select" id="city" name="city">
+                                            <option value="">Select City</option>
+                                            <!-- Add Indian cities here -->
+                                            <option value="Mumbai">Mumbai</option>
+                                            <option value="Delhi">Delhi</option>
+                                            <option value="Bangalore">Bangalore</option>
+                                            <option value="Hyderabad">Hyderabad</option>
+                                            <option value="Ahmedabad">Ahmedabad</option>
+                                            <option value="Chennai">Chennai</option>
+                                            <option value="Kolkata">Kolkata</option>
+                                            <option value="Surat">Surat</option>
+                                            <option value="Pune">Pune</option>
+                                            <option value="Jaipur">Jaipur</option>
+                                            <!-- Add more cities as needed -->
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="location" class="form-label">Venue Address / Map Link *</label>
+                                        <input type="text" class="form-control" id="location" name="location" placeholder="Enter full address or map link">
+                                        <small class="text-muted">For map selection, provide a link (e.g., Google Maps).</small>
+                                    </div>
+                                </div>
+
+                                <div class="payment-fields" style="display: none;">
+                                    <div class="mb-3">
+                                        <label for="payment_qr" class="form-label">Payment QR Code (UPI) *</label>
+                                        <input type="file" class="form-control" id="payment_qr" name="payment_qr" accept="image/*">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="participation_fee" class="form-label">Participation Fee (INR)</label>
+                                        <input type="number" class="form-control" id="participation_fee" name="participation_fee" min="0" step="any">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Team Configuration -->
+                            <div class="section mb-4">
+                                <h6 class="text-primary mb-3">Team Configuration</h6>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="min_team_size" class="form-label">Minimum Team Size *</label>
+                                        <input type="number" class="form-control" id="min_team_size" name="min_team_size" min="1">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="max_team_size" class="form-label">Maximum Team Size *</label>
+                                        <input type="number" class="form-control" id="max_team_size" name="max_team_size" min="1">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="max_participants" class="form-label">Maximum Participants *</label>
+                                        <input type="number" class="form-control" id="max_participants" name="max_participants" min="1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Round Details -->
+                            <div class="section mb-4">
+                                <h6 class="text-primary mb-3">Round Details</h6>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="num_rounds" class="form-label">Number of Rounds *</label>
+                                        <input type="number" class="form-control" id="num_rounds" name="num_rounds" min="1">
+                                    </div>
+                                </div>
+                                <div id="roundsContainer">
+                                    <!-- Round details will be added dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Organizers -->
+                            <div class="section mb-4">
+                                <h6 class="text-primary mb-3">Event Organizers</h6>
+                                <div id="organizersContainer">
+                                    <!-- Initial Organizer Entry -->
+                                    <div class="organizer-entry mb-3 p-3 border rounded">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-2">
+                                                <label class="form-label">Name *</label>
+                                                <input type="text" class="form-control" name="organizer_name[]">
+                                            </div>
+                                            <div class="col-md-6 mb-2">
+                                                <label class="form-label">Designation *</label>
+                                                <input type="text" class="form-control" name="organizer_designation[]">
+                                            </div>
+                                            <div class="col-md-6 mb-2">
+                                                <label class="form-label">Phone *</label>
+                                                <input type="tel" class="form-control" name="organizer_phone[]">
+                                            </div>
+                                            <div class="col-md-6 mb-2">
+                                                <label class="form-label">Email *</label>
+                                                <input type="email" class="form-control" name="organizer_email[]">
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger mt-2 remove-organizer" onclick="removeOrganizer(this)" style="display: none;">Remove</button>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addOrganizer()">
+                                    <i class="fas fa-plus"></i> Add Another Organizer
+                                </button>
+                            </div>
+
+                            <!-- Prizes -->
+                            <div class="section mb-4">
+                                <h6 class="text-primary mb-3">Prizes</h6>
+                                <div id="prizesContainer">
+                                    <!-- Initial Prize Entry -->
+                                    <div class="prize-entry mb-3 p-3 border rounded">
+                                        <div class="row">
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label">Position/Category *</label>
+                                                <input type="text" class="form-control" name="prize_position[]" placeholder="e.g., 1st Place, Best UI, Eligible Participants">
+                                            </div>
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label">Type *</label>
+                                                <select class="form-select" name="prize_type[]">
+                                                    <option value="money">Money</option>
+                                                    <option value="gift">Gift/Swag</option>
+                                                    <option value="other">Other</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label">Description/Value *</label>
+                                                <input type="text" class="form-control" name="prize_description[]" placeholder="e.g., INR 50000, Macbook Pro, T-shirts">
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger mt-2 remove-prize" onclick="removePrize(this)" style="display: none;">Remove</button>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addPrize()">
+                                    <i class="fas fa-plus"></i> Add Another Prize
+                                </button>
+                            </div>
+
+                        </div> <!-- End Hackathon Specific Fields -->
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Create Event</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    // --- Event Type Handling ---
+    const eventTypeSelect = document.getElementById('event_type');
+    const hackathonFields = document.getElementById('hackathonFields');
+    const requiredHackathonInputs = hackathonFields.querySelectorAll('input[required], select[required], textarea[required]');
+
+    eventTypeSelect.addEventListener('change', function() {
+        if (this.value === 'HACKATHON') {
+            hackathonFields.style.display = 'block';
+            // Make hackathon fields required
+            requiredHackathonInputs.forEach(input => input.required = true);
+            // Trigger dependent field updates
+            document.getElementById('event_mode').dispatchEvent(new Event('change'));
+            document.getElementById('participation_mode').dispatchEvent(new Event('change'));
+            document.getElementById('num_rounds').dispatchEvent(new Event('input'));
+            updateRemoveButtons('organizer-entry', 'remove-organizer');
+            updateRemoveButtons('prize-entry', 'remove-prize');
+        } else {
+            hackathonFields.style.display = 'none';
+            // Make hackathon fields not required
+            requiredHackathonInputs.forEach(input => input.required = false);
+        }
+    });
+
+    // --- Location & Payment Fields --- (Inside Hackathon Fields)
+    const eventModeSelect = document.getElementById('event_mode');
+    const participationModeSelect = document.getElementById('participation_mode');
+    const locationFields = document.querySelector('.location-fields');
+    const paymentFields = document.querySelector('.payment-fields');
+    const cityInput = document.getElementById('city');
+    const locationInput = document.getElementById('location');
+    const paymentQrInput = document.getElementById('payment_qr');
+    const participationFeeInput = document.getElementById('participation_fee');
+
+    eventModeSelect.addEventListener('change', function() {
+        if (['offline', 'hybrid'].includes(this.value)) {
+            locationFields.style.display = 'flex'; // Use flex for row layout
+            cityInput.required = true;
+            locationInput.required = true;
+        } else {
+            locationFields.style.display = 'none';
+            cityInput.required = false;
+            locationInput.required = false;
+        }
+    });
+
+    participationModeSelect.addEventListener('change', function() {
+        if (this.value === 'pay') {
+            paymentFields.style.display = 'block';
+            paymentQrInput.required = true;
+            // Participation fee is optional
+        } else {
+            paymentFields.style.display = 'none';
+            paymentQrInput.required = false;
+        }
+    });
+
+    // --- Dynamic Rounds --- (Inside Hackathon Fields)
+    const numRoundsInput = document.getElementById('num_rounds');
+    const roundsContainer = document.getElementById('roundsContainer');
+
+    numRoundsInput.addEventListener('input', function() {
+        const numRounds = parseInt(this.value) || 0;
+        roundsContainer.innerHTML = ''; // Clear existing rounds
+
+        for (let i = 1; i <= numRounds; i++) {
+            const roundDiv = document.createElement('div');
+            roundDiv.classList.add('round-entry', 'mb-3', 'p-3', 'border', 'rounded');
+            roundDiv.innerHTML = `
+                <h6>Round ${i}</h6>
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <label for="round_${i}_start_time" class="form-label">Start Time *</label>
+                        <input type="datetime-local" class="form-control" id="round_${i}_start_time" name="round_start_time[]" required>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label for="round_${i}_end_time" class="form-label">End Time *</label>
+                        <input type="datetime-local" class="form-control" id="round_${i}_end_time" name="round_end_time[]" required>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label for="round_${i}_results_date" class="form-label">Results Date *</label>
+                        <input type="datetime-local" class="form-control" id="round_${i}_results_date" name="round_results_date[]" required>
+                    </div>
+                </div>
+            `;
+            roundsContainer.appendChild(roundDiv);
+        }
+    });
+
+    // --- Dynamic Organizers --- (Inside Hackathon Fields)
+    const organizersContainer = document.getElementById('organizersContainer');
+
+    function addOrganizer() {
+        const template = organizersContainer.querySelector('.organizer-entry');
+        const newEntry = template.cloneNode(true);
+        // Clear input values in the clone
+        newEntry.querySelectorAll('input').forEach(input => input.value = '');
+        // Ensure remove button is visible
+        newEntry.querySelector('.remove-organizer').style.display = 'inline-block';
+        organizersContainer.appendChild(newEntry);
+        updateRemoveButtons('organizer-entry', 'remove-organizer');
+    }
+
+    function removeOrganizer(button) {
+        button.closest('.organizer-entry').remove();
+        updateRemoveButtons('organizer-entry', 'remove-organizer');
+    }
+
+    // --- Dynamic Prizes --- (Inside Hackathon Fields)
+    const prizesContainer = document.getElementById('prizesContainer');
+
+    function addPrize() {
+        const template = prizesContainer.querySelector('.prize-entry');
+        const newEntry = template.cloneNode(true);
+        // Clear input values in the clone
+        newEntry.querySelectorAll('input, select').forEach(el => {
+            if (el.tagName === 'SELECT') {
+                el.selectedIndex = 0;
+            } else {
+                el.value = '';
+            }
+        });
+        // Ensure remove button is visible
+        newEntry.querySelector('.remove-prize').style.display = 'inline-block';
+        prizesContainer.appendChild(newEntry);
+        updateRemoveButtons('prize-entry', 'remove-prize');
+    }
+
+    function removePrize(button) {
+        button.closest('.prize-entry').remove();
+        updateRemoveButtons('prize-entry', 'remove-prize');
+    }
+
+    // --- Utility to hide remove button if only one entry exists ---
+    function updateRemoveButtons(entryClass, removeClass) {
+        const container = document.getElementById(entryClass === 'organizer-entry' ? 'organizersContainer' : 'prizesContainer');
+        const entries = container.querySelectorAll(`.${entryClass}`);
+        entries.forEach((entry, index) => {
+            const removeButton = entry.querySelector(`.${removeClass}`);
+            if (removeButton) {
+                removeButton.style.display = entries.length > 1 ? 'inline-block' : 'none';
+            }
+        });
+    }
+
+    // --- Team Size Validation ---
+    const minTeamSizeInput = document.getElementById('min_team_size');
+    const maxTeamSizeInput = document.getElementById('max_team_size');
+
+    function validateTeamSize() {
+        const minSize = parseInt(minTeamSizeInput.value);
+        const maxSize = parseInt(maxTeamSizeInput.value);
+        if (minSize && maxSize && minSize > maxSize) {
+            maxTeamSizeInput.setCustomValidity('Max team size must be greater than or equal to min team size.');
+        } else {
+            maxTeamSizeInput.setCustomValidity('');
+        }
+    }
+
+    minTeamSizeInput.addEventListener('input', validateTeamSize);
+    maxTeamSizeInput.addEventListener('input', validateTeamSize);
+
+    // --- Initial Setup ---
+    // Trigger change on page load in case of form repopulation
+    eventTypeSelect.dispatchEvent(new Event('change'));
+
+</script>
+{% endblock %}
+
+<style>
+.section {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+.card {
+    border: none;
+}
+
+.card-header {
+    border-bottom: none;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.tags-container .badge {
+    padding: 0.5em 0.7em;
+    margin-right: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.tags-container .badge i {
+    margin-left: 0.5em;
+}
+
+.tags-container .badge:hover {
+    opacity: 0.9;
+}
+</style>
+{% endblock %}

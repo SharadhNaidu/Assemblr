@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Event Admin - {{ event.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Event Details Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Event Details</h5>
+                </div>
+                <div class="card-body">
+                    <h5>{{ event.name }}</h5>
+                    <p><strong>Type:</strong> {{ event.event_type }}</p>
+                    <p><strong>Mode:</strong> {{ event.event_mode }}</p>
+                    <p><strong>Participation Mode:</strong> {{ event.participation_mode }}</p>
+                    <p><strong>Team Size:</strong> {{ event.min_team_size }} - {{ event.max_team_size }}</p>
+                    <p><strong>Max Participants:</strong> {{ event.max_participants }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Participants Section -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Participants</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Team Name</th>
+                                    <th>Team Leader</th>
+                                    <th>Status</th>
+                                    <th>Payment Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for participant in event.participants %}
+                                <tr>
+                                    <td>{{ participant.team_name }}</td>
+                                    <td>{{ participant.user.first_name }} {{ participant.user.last_name }}</td>
+                                    <td>
+                                        <span class="badge {% if participant.status == 'approved' %}bg-success{% elif participant.status == 'rejected' %}bg-danger{% else %}bg-warning{% endif %}">
+                                            {{ participant.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if participant.payment_status == 'paid' %}bg-success{% elif participant.payment_status == 'verified' %}bg-success{% else %}bg-warning{% endif %}">
+                                            {{ participant.payment_status|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" onclick="viewParticipant({{ participant.id }})">View</button>
+                                        {% if participant.status == 'pending' %}
+                                            <button class="btn btn-sm btn-success" onclick="approveParticipant({{ participant.id }})">Approve</button>
+                                            <button class="btn btn-sm btn-danger" onclick="rejectParticipant({{ participant.id }})">Reject</button>
+                                        {% endif %}
+                                        {% if participant.payment_status == 'pending' and event.participation_mode == 'pay' %}
+                                            <button class="btn btn-sm btn-primary" onclick="verifyPayment({{ participant.id }})">Verify Payment</button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submissions Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Submissions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Round</th>
+                                    <th>Team</th>
+                                    <th>Submission</th>
+                                    <th>Status</th>
+                                    <th>Score</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for submission in event.submissions %}
+                                <tr>
+                                    <td>Round {{ submission.round_number }}</td>
+                                    <td>{{ submission.participant.team_name }}</td>
+                                    <td>
+                                        {% if submission.submission_url %}
+                                            <a href="{{ submission.submission_url }}" target="_blank">View URL</a>
+                                        {% endif %}
+                                        {% if submission.submission_file %}
+                                            <a href="{{ url_for('download_submission', submission_id=submission.id) }}">Download File</a>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if submission.status == 'accepted' %}bg-success{% elif submission.status == 'rejected' %}bg-danger{% else %}bg-warning{% endif %}">
+                                            {{ submission.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ submission.score or 'Not Scored' }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" onclick="viewSubmission({{ submission.id }})">View</button>
+                                        <button class="btn btn-sm btn-primary" onclick="evaluateSubmission({{ submission.id }})">Evaluate</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Participant Details Modal -->
+<div class="modal fade" id="participantModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Participant Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="participantDetails"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Submission Evaluation Modal -->
+<div class="modal fade" id="evaluationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Evaluate Submission</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="evaluationForm">
+                    <input type="hidden" id="submissionId">
+                    <div class="mb-3">
+                        <label for="score" class="form-label">Score</label>
+                        <input type="number" class="form-control" id="score" min="0" max="100">
+                    </div>
+                    <div class="mb-3">
+                        <label for="feedback" class="form-label">Feedback</label>
+                        <textarea class="form-control" id="feedback" rows="4"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status">
+                            <option value="accepted">Accepted</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitEvaluation()">Submit Evaluation</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function viewParticipant(participantId) {
+    fetch(`/event/participant/${participantId}`)
+        .then(response => response.json())
+        .then(data => {
+            const modal = new bootstrap.Modal(document.getElementById('participantModal'));
+            document.getElementById('participantDetails').innerHTML = `
+                <h6>Team Information</h6>
+                <p><strong>Team Name:</strong> ${data.team_name}</p>
+                <p><strong>Team Leader:</strong> ${data.user.first_name} ${data.user.last_name}</p>
+                <p><strong>Email:</strong> ${data.user.email}</p>
+                <p><strong>Phone:</strong> ${data.user.phone}</p>
+                
+                <h6 class="mt-3">Social Profiles</h6>
+                <p><strong>LinkedIn:</strong> <a href="${data.user.linkedin}" target="_blank">${data.user.linkedin}</a></p>
+                <p><strong>GitHub:</strong> <a href="${data.user.github}" target="_blank">${data.user.github}</a></p>
+                
+                <h6 class="mt-3">Team Members</h6>
+                <ul>
+                    ${data.team_members.map(member => `
+                        <li>${member.first_name} ${member.last_name} (${member.email})</li>
+                    `).join('')}
+                </ul>
+                
+                ${data.payment_status === 'pending' && data.payment_qr ? `
+                    <h6 class="mt-3">Payment QR</h6>
+                    <img src="/static/uploads/event_qrs/${data.payment_qr}" class="img-fluid" alt="Payment QR">
+                ` : ''}
+            `;
+            modal.show();
+        });
+}
+
+function approveParticipant(participantId) {
+    if (confirm('Are you sure you want to approve this participant?')) {
+        fetch(`/event/participant/${participantId}/approve`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+    }
+}
+
+function rejectParticipant(participantId) {
+    if (confirm('Are you sure you want to reject this participant?')) {
+        fetch(`/event/participant/${participantId}/reject`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+    }
+}
+
+function verifyPayment(participantId) {
+    if (confirm('Are you sure you want to verify this payment?')) {
+        fetch(`/event/participant/${participantId}/verify-payment`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+    }
+}
+
+function evaluateSubmission(submissionId) {
+    document.getElementById('submissionId').value = submissionId;
+    const modal = new bootstrap.Modal(document.getElementById('evaluationModal'));
+    modal.show();
+}
+
+function submitEvaluation() {
+    const submissionId = document.getElementById('submissionId').value;
+    const score = document.getElementById('score').value;
+    const feedback = document.getElementById('feedback').value;
+    const status = document.getElementById('status').value;
+
+    fetch(`/event/submission/${submissionId}/evaluate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            score: score,
+            feedback: feedback,
+            status: status
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %} 

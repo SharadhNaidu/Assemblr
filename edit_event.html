@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Event - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Edit Event</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('edit_event', event_id=event.id) }}">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Event Title *</label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ event.title }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Event Description *</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" required>{{ event.description }}</textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="date" class="form-label">Start Date and Time *</label>
+                                <input type="datetime-local" class="form-control" id="date" name="date" 
+                                       value="{{ event.date.strftime('%Y-%m-%dT%H:%M') }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="end_date" class="form-label">End Date and Time *</label>
+                                <input type="datetime-local" class="form-control" id="end_date" name="end_date"
+                                       value="{{ event.end_date.strftime('%Y-%m-%dT%H:%M') }}" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location *</label>
+                            <input type="text" class="form-control" id="location" name="location" value="{{ event.location }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="event_type" class="form-label">Event Type *</label>
+                            <select class="form-select" id="event_type" name="event_type" required>
+                                <option value="">Select Event Type</option>
+                                <option value="Technical" {% if event.event_type == 'Technical' %}selected{% endif %}>Technical</option>
+                                <option value="Cultural" {% if event.event_type == 'Cultural' %}selected{% endif %}>Cultural</option>
+                                <option value="Sports" {% if event.event_type == 'Sports' %}selected{% endif %}>Sports</option>
+                                <option value="Workshop" {% if event.event_type == 'Workshop' %}selected{% endif %}>Workshop</option>
+                                <option value="Seminar" {% if event.event_type == 'Seminar' %}selected{% endif %}>Seminar</option>
+                                <option value="Conference" {% if event.event_type == 'Conference' %}selected{% endif %}>Conference</option>
+                                <option value="Other" {% if event.event_type == 'Other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="capacity" class="form-label">Capacity (optional)</label>
+                            <input type="number" class="form-control" id="capacity" name="capacity" 
+                                   value="{{ event.capacity if event.capacity }}" min="1">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="registration_deadline" class="form-label">Registration Deadline (optional)</label>
+                            <input type="datetime-local" class="form-control" id="registration_deadline" name="registration_deadline"
+                                   value="{{ event.registration_deadline.strftime('%Y-%m-%dT%H:%M') if event.registration_deadline }}">
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Update Event</button>
+                            <a href="{{ url_for('view_event', event_id=event.id) }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Assemblr{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Users Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>User Management</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Registered Users</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Profession</th>
+                                    <th>Registration Date</th>
+                                    <th>Last Login</th>
+                                    <th>Admin</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.first_name }} {{ user.last_name }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.phone }}</td>
+                                    <td>{{ user.profession|title }}</td>
+                                    <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else 'Never' }}</td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('toggle_admin', user_id=user.id) }}" style="display: inline;">
+                                            <button type="submit" class="btn btn-{{ 'success' if user.is_admin else 'secondary' }} btn-sm">
+                                                {{ 'Remove Admin' if user.is_admin else 'Make Admin' }}
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" 
+                                              onsubmit="return confirm('Are you sure you want to delete this user?');" 
+                                              style="display: inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organizations Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Organization Management</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs mb-3" id="orgTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button">
+                                Pending Verification <span class="badge bg-warning badge-count">{{ pending_organizations|length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="verified-tab" data-bs-toggle="tab" data-bs-target="#verified" type="button">
+                                Verified Organizations <span class="badge bg-success badge-count">{{ verified_organizations|length }}</span>
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="orgTabsContent">
+                        <!-- Pending Organizations -->
+                        <div class="tab-pane fade show active" id="pending">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Registration #</th>
+                                            <th>Email</th>
+                                            <th>Admin Name</th>
+                                            <th>Submitted</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for org in pending_organizations %}
+                                        <tr>
+                                            <td>{{ org.id }}</td>
+                                            <td>{{ org.org_name }}</td>
+                                            <td>
+                                                <span class="badge bg-info org-type-badge">{{ org.org_type }}</span>
+                                            </td>
+                                            <td>{{ org.registration_number }}</td>
+                                            <td>{{ org.org_email }}</td>
+                                            <td>{{ org.admin_name }}</td>
+                                            <td class="submitted-date">
+                                                {{ org.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                            </td>
+                                            <td class="action-buttons">
+                                                <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#orgModal{{ org.id }}">
+                                                    View Details
+                                                </button>
+                                                <form method="POST" action="{{ url_for('verify_organization', org_id=org.id) }}" style="display: inline;">
+                                                    <button type="submit" class="btn btn-success btn-sm">Verify</button>
+                                                </form>
+                                                <form method="POST" action="{{ url_for('delete_organization', org_id=org.id) }}" 
+                                                      onsubmit="return confirm('Are you sure you want to delete this organization?');" 
+                                                      style="display: inline;">
+                                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Organization Details Modal -->
+                                        <div class="modal fade" id="orgModal{{ org.id }}" tabindex="-1">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Organization Details</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="row">
+                                                            <div class="col-md-4">
+                                                                <img src="{{ url_for('static', filename='org_logos/' + org.logo) }}" 
+                                                                     alt="Organization Logo" class="img-fluid mb-3">
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <h4>{{ org.org_name }}</h4>
+                                                                <p><strong>Type:</strong> {{ org.org_type|title }}</p>
+                                                                <p><strong>Registration Number:</strong> {{ org.registration_number }}</p>
+                                                                <p><strong>Website:</strong> <a href="{{ org.website }}" target="_blank">{{ org.website }}</a></p>
+                                                                <p><strong>LinkedIn:</strong> <a href="{{ org.linkedin }}" target="_blank">Profile</a></p>
+                                                                <p><strong>Description:</strong><br>{{ org.description }}</p>
+                                                                <p><strong>Address:</strong><br>{{ org.address }}</p>
+                                                                <p><strong>Contact:</strong><br>
+                                                                   Admin: {{ org.admin_name }} ({{ org.designation }})<br>
+                                                                   Email: {{ org.work_email }}<br>
+                                                                   Phone: {{ org.contact_number }}</p>
+                                                                <p><strong>Event Categories:</strong><br>{{ org.event_categories }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        <form method="POST" action="{{ url_for('verify_organization', org_id=org.id) }}" style="display: inline;">
+                                                            <button type="submit" class="btn btn-success">Verify Organization</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Verified Organizations -->
+                        <div class="tab-pane fade" id="verified">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Registration #</th>
+                                            <th>Email</th>
+                                            <th>Admin Name</th>
+                                            <th>Verified Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for org in verified_organizations %}
+                                        <tr>
+                                            <td>{{ org.id }}</td>
+                                            <td>{{ org.org_name }}</td>
+                                            <td>
+                                                <span class="badge bg-info org-type-badge">{{ org.org_type }}</span>
+                                            </td>
+                                            <td>{{ org.registration_number }}</td>
+                                            <td>{{ org.org_email }}</td>
+                                            <td>{{ org.admin_name }}</td>
+                                            <td class="submitted-date">
+                                                {{ org.verified_at.strftime('%Y-%m-%d %H:%M') if org.verified_at else 'N/A' }}
+                                            </td>
+                                            <td class="action-buttons">
+                                                <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#orgModal{{ org.id }}">
+                                                    View Details
+                                                </button>
+                                                <form method="POST" action="{{ url_for('revoke_organization', org_id=org.id) }}" 
+                                                      onsubmit="return confirm('Are you sure you want to revoke this organization\'s verification?');" 
+                                                      style="display: inline;">
+                                                    <button type="submit" class="btn btn-warning btn-sm">Revoke</button>
+                                                </form>
+                                                <form method="POST" action="{{ url_for('delete_organization', org_id=org.id) }}" 
+                                                      onsubmit="return confirm('Are you sure you want to delete this organization?');" 
+                                                      style="display: inline;">
+                                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Organization Details Modal -->
+                                        <div class="modal fade" id="orgModal{{ org.id }}" tabindex="-1">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Organization Details</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="row">
+                                                            <div class="col-md-4">
+                                                                <img src="{{ url_for('static', filename='org_logos/' + org.logo) }}" 
+                                                                     alt="Organization Logo" class="img-fluid mb-3">
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <h4>{{ org.org_name }}</h4>
+                                                                <p><strong>Type:</strong> {{ org.org_type|title }}</p>
+                                                                <p><strong>Registration Number:</strong> {{ org.registration_number }}</p>
+                                                                <p><strong>Website:</strong> <a href="{{ org.website }}" target="_blank">{{ org.website }}</a></p>
+                                                                <p><strong>LinkedIn:</strong> <a href="{{ org.linkedin }}" target="_blank">Profile</a></p>
+                                                                <p><strong>Description:</strong><br>{{ org.description }}</p>
+                                                                <p><strong>Address:</strong><br>{{ org.address }}</p>
+                                                                <p><strong>Contact:</strong><br>
+                                                                   Admin: {{ org.admin_name }} ({{ org.designation }})<br>
+                                                                   Email: {{ org.work_email }}<br>
+                                                                   Phone: {{ org.contact_number }}</p>
+                                                                <p><strong>Event Categories:</strong><br>{{ org.event_categories }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

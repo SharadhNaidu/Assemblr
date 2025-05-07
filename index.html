@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assemblr - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .welcome-section {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            padding: 4rem 0;
+            margin-bottom: 2rem;
+        }
+        .auth-panel {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-top: -3rem;
+        }
+        .auth-btn {
+            width: 100%;
+            margin-bottom: 1rem;
+            padding: 0.8rem;
+            font-weight: 500;
+        }
+        .user-section, .org-section {
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+        .user-section {
+            background-color: #f8f9fa;
+        }
+        .org-section {
+            background-color: #e9ecef;
+        }
+        .section-title {
+            color: #495057;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-section text-center">
+        <div class="container">
+            <h1 class="display-4 mb-4">Welcome to Assemblr</h1>
+            <p class="lead">Your one-stop platform for connecting with organizations and events</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="auth-panel">
+                    <div class="user-section">
+                        <h3 class="section-title">For Users</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a href="{{ url_for('login') }}" class="btn btn-primary auth-btn">
+                                    <i class="bi bi-box-arrow-in-right"></i> User Login
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="{{ url_for('register') }}" class="btn btn-outline-primary auth-btn">
+                                    <i class="bi bi-person-plus"></i> User Register
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="org-section">
+                        <h3 class="section-title">For Organizations</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a href="{{ url_for('organization_login') }}" class="btn btn-success auth-btn">
+                                    <i class="bi bi-building"></i> Organization Login
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="{{ url_for('organization_register') }}" class="btn btn-outline-success auth-btn">
+                                    <i class="bi bi-building-add"></i> Organization Register
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</body>
+</html> 

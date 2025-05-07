@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Event Details</h5>
+                    <div>
+                        <a href="{{ url_for('edit_event', event_id=event.id) }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-edit"></i> Edit Event
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title">{{ event.title }}</h3>
+                    
+                    <div class="mb-4">
+                        <span class="badge bg-{{ 'success' if event.is_active else 'secondary' }}">
+                            {{ 'Active' if event.is_active else 'Inactive' }}
+                        </span>
+                        <span class="badge bg-info">{{ event.event_type }}</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p class="card-text">{{ event.description }}</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Event Details</h5>
+                            <ul class="list-unstyled">
+                                <li><strong>Start:</strong> {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}</li>
+                                <li><strong>End:</strong> {{ event.end_date.strftime('%B %d, %Y at %I:%M %p') }}</li>
+                                <li><strong>Location:</strong> {{ event.location }}</li>
+                                {% if event.capacity %}
+                                    <li><strong>Capacity:</strong> {{ event.capacity }} participants</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Registration</h5>
+                            {% if event.registration_deadline %}
+                                <p>Registration closes on {{ event.registration_deadline.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                            {% else %}
+                                <p>No registration deadline specified</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('organization_dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    Created on {{ event.created_at.strftime('%B %d, %Y') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
